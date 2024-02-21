@@ -1,0 +1,5 @@
+content/*
+!content/index.html
+content_original/*
+!content_original/.gitkeep
+.mypy_cache

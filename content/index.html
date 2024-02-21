@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>HLS Demo</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <select id="playlist" style="width: 300px; margin-bottom: 20px">
+      <option value="/bbb/bbb.m3u8">Big Buck Bunny</option>
+      <option value="/charge/charge.m3u8">CHARGE</option>
+      <option value="/wing_it/wing_it.m3u8">WING IT!</option>
+      <option value="/tears_of_steel/tears_of_steel.m3u8">Tears of Steel</option>
+    </select>
+    <button onclick="loadPlaylist()">Load Playlist</button>
+
+    <video height="1080" width="1920" controls id="video"></video>
+
+    <script>
+      var video = document.getElementById("video");
+      var playlistSelect = document.getElementById("playlist");
+
+      function loadPlaylist() {
+        var playlistUrl = playlistSelect.value;
+        if (Hls.isSupported()) {
+          const hls = new Hls({
+            debug: true,
+          });
+          hls.loadSource(playlistUrl);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = playlistUrl;
+          video.addEventListener("canplay", function () {
+            video.play();
+          });
+        }
+      }
+    </script>
+  </body>
+</html>
