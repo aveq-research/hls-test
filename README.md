@@ -12,6 +12,7 @@ Contents:
   - [Encoding](#encoding)
   - [Running the Server](#running-the-server)
   - [Playing via HLS](#playing-via-hls)
+- [How to Modify the Encoding/Streaming](#how-to-modify-the-encodingstreaming)
 - [Limiting Network Throughput](#limiting-network-throughput)
 - [License](#license)
 
@@ -58,7 +59,7 @@ Run the server with:
 docker-compose up
 ```
 
-Open the browser and navigate to `http://localhost:3005/` to see the videos.
+Open the browser and navigate to `http://localhost:3005/` to see the videos. We use `hls.js` to play the videos directly in the browser.
 
 To stop the server, press `Ctrl+C` in the terminal.
 
@@ -70,6 +71,12 @@ You can access the videos directly via the m3u8 links:
 - http://localhost:3005/charge/charge.m3u8
 - http://localhost:3005/wing_it/wing_it.m3u8
 - http://localhost:3005/tears_of_steel/tears_of_steel.m3u8
+
+## How to Modify the Encoding/Streaming
+
+Feel free to adjust the encoding settings in `utils/encode.sh`. We've chosen a simple set of renditions with a one-pass fixed target bitrate, and no audio.
+
+You can also modify the `content/index.html` page to adjust the `hls.js` settings or video display.
 
 ## Limiting Network Throughput
 
