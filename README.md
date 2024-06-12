@@ -21,7 +21,7 @@ Contents:
 - Docker and Docker Compose
 - ffmpeg from https://ffmpeg.org/download.html
 - `yt-dlp` from https://github.com/yt-dlp/yt-dlp
-- For limiting: Linux with `tc`, and Python
+- For limiting: Python (the needed `tc` commands can be run inside Docker) 
 
 ## Usage
 
@@ -56,7 +56,7 @@ This creates various representations of the videos in the `content` directory, u
 Run the server with:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 Open the browser and navigate to `http://localhost:3005/` to see the videos. We use `hls.js` to play the videos directly in the browser.
@@ -88,7 +88,7 @@ The script can interact with the running Docker container, so you do not have to
 python3 ./limit.py --use-docker apply-profile 3g
 ```
 
-This will limit the network throughput to 3Gbps. You can also remove the limit with:
+This will limit the network throughput to simulate a 3G network. You can also remove the limit with:
 
 ```bash
 python3 ./limit.py --use-docker clear
