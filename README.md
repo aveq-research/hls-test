@@ -31,19 +31,13 @@ First, clone the repo.
 
 We do not provide the video files in this repo. You can download them from YouTube using `yt-dlp`.
 
-We use open-source movies from the Blender Foundation. Download the original contents to `content_original`. You can get them like so:
+We use open-source movies from the Blender Foundation. Run the download script to fetch all videos to `content_original/`:
 
 ```bash
-cd content_original
-# CHARGE
-yt-dlp https://youtu.be/UXqq0ZvbOnk
-# WING IT!
-yt-dlp https://youtu.be/u9lj-c29dxI
-# Tears of Steel
-yt-dlp https://youtu.be/R6MlUcmOul8
-# Big Buck Bunny
-yt-dlp https://youtu.be/aqz-KE-bpKQ
+./utils/download.sh
 ```
+
+The script will skip videos that have already been downloaded.
 
 ### Encoding
 
