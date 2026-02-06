@@ -14,6 +14,8 @@ cd "$(dirname "$0")/.."
 CONTENT_DIR=content
 START_OFFSET=5
 ENCODE_TIME=180
+USE_LOCAL=false
+FORCE=false
 
 usage() {
   echo "Usage: $0 [options]"
@@ -21,6 +23,8 @@ usage() {
   echo "Options:"
   echo "  -ss <time>        Start time offset in seconds (default: $START_OFFSET)"
   echo "  -t <time>         Encode time in seconds (default: $ENCODE_TIME)"
+  echo "  --local           Encode from local folder (requires LOCAL_FOLDER env var)"
+  echo "  --force           Re-encode even if output already exists"
   echo "  -h, --help        Display this help message and exit"
   exit 1
 }
@@ -38,6 +42,14 @@ while [[ $# -gt 0 ]]; do
     ENCODE_TIME="$2"
     shift 2
     ;;
+  --local)
+    USE_LOCAL=true
+    shift
+    ;;
+  --force)
+    FORCE=true
+    shift
+    ;;
   *)
     echo "Unknown option: $1"
     usage
@@ -48,12 +60,42 @@ done
 # ========================
 # VARIABLES AND FUNCTIONS
 
-declare -A input_movies=(
-  ["bbb"]="./content_original/Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film [aqz-KE-bpKQ].mkv"
-  ["charge"]="./content_original/CHARGE - Blender Open Movie [UXqq0ZvbOnk].webm"
-  ["wing_it"]="./content_original/WING IT! - Blender Open Movie [u9lj-c29dxI].webm"
-  ["tears_of_steel"]="./content_original/Tears of Steel - Blender VFX Open Movie [R6MlUcmOul8].webm"
-)
+declare -A input_movies
+
+if [[ "$USE_LOCAL" == true ]]; then
+  if [[ -z "$LOCAL_FOLDER" ]]; then
+    echo "Error: LOCAL_FOLDER environment variable is not set"
+    exit 1
+  fi
+  if [[ ! -d "$LOCAL_FOLDER" ]]; then
+    echo "Error: LOCAL_FOLDER does not exist: $LOCAL_FOLDER"
+    exit 1
+  fi
+  # Sparks - try different file names
+  if [[ -f "${LOCAL_FOLDER}/Sparks_4096x2160_5994fps_SDR.mp4" ]]; then
+    input_movies["sparks"]="${LOCAL_FOLDER}/Sparks_4096x2160_5994fps_SDR.mp4"
+  elif [[ -f "${LOCAL_FOLDER}/Sparks_SDR_UHD_4096x2160_5994fps.mov" ]]; then
+    input_movies["sparks"]="${LOCAL_FOLDER}/Sparks_SDR_UHD_4096x2160_5994fps.mov"
+  else
+    echo "Warning: Sparks video not found in ${LOCAL_FOLDER}"
+  fi
+
+  # Meridian - try different file names
+  if [[ -f "${LOCAL_FOLDER}/Meridian_3840x2160_5994fps_SDR.mp4" ]]; then
+    input_movies["meridian"]="${LOCAL_FOLDER}/Meridian_3840x2160_5994fps_SDR.mp4"
+  elif [[ -f "${LOCAL_FOLDER}/Meridian_UHD4k5994_HDR_P3PQ.mp4" ]]; then
+    input_movies["meridian"]="${LOCAL_FOLDER}/Meridian_UHD4k5994_HDR_P3PQ.mp4"
+  else
+    echo "Warning: Meridian video not found in ${LOCAL_FOLDER}"
+  fi
+else
+  input_movies=(
+    ["bbb"]="./content_original/Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film [aqz-KE-bpKQ].mkv"
+    ["charge"]="./content_original/CHARGE - Blender Open Movie [UXqq0ZvbOnk].webm"
+    ["wing_it"]="./content_original/WING IT! - Blender Open Movie [u9lj-c29dxI].webm"
+    ["tears_of_steel"]="./content_original/Tears of Steel - Blender VFX Open Movie [R6MlUcmOul8].webm"
+  )
+fi
 
 encode_movie() {
   local input_movie="$1"
@@ -111,6 +153,11 @@ mkdir -p "$CONTENT_DIR"
 
 # iterate and encode
 for movie in "${!input_movies[@]}"; do
+  master_playlist="${CONTENT_DIR}/${movie}/${movie}.m3u8"
+  if [[ -f "$master_playlist" && "$FORCE" != true ]]; then
+    echo "Skipping $movie (already encoded, use --force to re-encode)"
+    continue
+  fi
   echo "Encoding $movie ..."
   encode_movie "${input_movies[$movie]}" "$movie.m3u8"
 done

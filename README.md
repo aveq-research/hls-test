@@ -45,6 +45,19 @@ Encode the movies with `./utils/encode.sh`.
 
 This creates various representations of the videos in the `content` directory, using HLS and multiple bitrate renditions. The videos will have their resolution embedded into the stream so you can see the difference in quality.
 
+To encode from a local folder (e.g., Netflix test sequences), use the `--local` flag:
+
+```bash
+LOCAL_FOLDER="/path/to/netflix" ./utils/encode.sh --local
+```
+
+This encodes Sparks and Meridian test sequences from the specified folder.
+
+The Netflix test sequences can be downloaded from:
+
+- Sparks: http://download.opencontent.netflix.com.s3.amazonaws.com/sparks/sdr/Sparks_SDR_UHD_4096x2160_5994fps.mov
+- Meridian: http://download.opencontent.netflix.com.s3.amazonaws.com/Meridian/Meridian_UHD4k5994_HDR_P3PQ.mp4
+
 ### Running the Server
 
 Run the server with:
@@ -65,6 +78,11 @@ You can access the videos directly via the m3u8 links:
 - http://localhost:3005/charge/charge.m3u8
 - http://localhost:3005/wing_it/wing_it.m3u8
 - http://localhost:3005/tears_of_steel/tears_of_steel.m3u8
+
+When using `--local`, these are also available:
+
+- http://localhost:3005/sparks/sparks.m3u8
+- http://localhost:3005/meridian/meridian.m3u8
 
 ## How to Modify the Encoding/Streaming
 
