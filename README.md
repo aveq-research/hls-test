@@ -43,12 +43,40 @@ The script will skip videos that have already been downloaded.
 
 Encode the movies with `./utils/encode.sh`.
 
-This creates various representations of the videos in the `content` directory, using HLS and multiple bitrate renditions. The videos will have their resolution embedded into the stream so you can see the difference in quality.
+This creates various representations of the videos in the `content` directory, using HLS and multiple bitrate renditions. The videos will have their resolution embedded into the stream so you can see the difference in quality. Sources with 4K resolution get 5 renditions (360p-4K), others get 4 (360p-1080p).
 
-To encode from a local folder (e.g., Netflix test sequences), use the `--local` flag:
+By default, H.264 is used. To encode with HEVC (H.265) instead, use `--codec hevc`:
 
 ```bash
+# H.264 (default)
+./utils/encode.sh
+
+# HEVC
+./utils/encode.sh --codec hevc
+```
+
+HEVC variants are placed in separate directories with an `_hevc` suffix (e.g. `bbb_hevc/bbb_hevc.m3u8`) so both codecs can coexist.
+
+HEVC encoding uses Main profile at Level 5.1 with `hvc1` tag for HLS compatibility. Bitrates are roughly 40% lower than H.264 at (somewhat) equivalent perceptual quality:
+
+- 360p: 800 kbps
+- 480p: 1400 kbps
+- 720p: 3000 kbps
+- 1080p: 5500 kbps
+- 4K: 14000 kbps
+
+Note that the quality will obviously depend on the content. But this is just a dummy repository anyway.
+
+#### Local Files
+
+To encode from a local folder (e.g., Netflix test sequences), use the `--local` flag. This can be combined with `--codec`:
+
+```bash
+# H.264
 LOCAL_FOLDER="/path/to/netflix" ./utils/encode.sh --local
+
+# HEVC
+LOCAL_FOLDER="/path/to/netflix" ./utils/encode.sh --local --codec hevc
 ```
 
 This encodes Sparks and Meridian test sequences from the specified folder.
@@ -72,21 +100,32 @@ To stop the server, press `Ctrl+C` in the terminal.
 
 ### Playing via HLS
 
-You can access the videos directly via the m3u8 links:
+You can access the videos directly via the m3u8 links.
+
+H.264 streams:
 
 - http://localhost:3005/bbb/bbb.m3u8
 - http://localhost:3005/charge/charge.m3u8
 - http://localhost:3005/wing_it/wing_it.m3u8
 - http://localhost:3005/tears_of_steel/tears_of_steel.m3u8
 
+HEVC streams (when encoded with `--codec hevc`):
+
+- http://localhost:3005/bbb_hevc/bbb_hevc.m3u8
+- http://localhost:3005/charge_hevc/charge_hevc.m3u8
+- http://localhost:3005/wing_it_hevc/wing_it_hevc.m3u8
+- http://localhost:3005/tears_of_steel_hevc/tears_of_steel_hevc.m3u8
+
 When using `--local`, these are also available:
 
 - http://localhost:3005/sparks/sparks.m3u8
 - http://localhost:3005/meridian/meridian.m3u8
+- http://localhost:3005/sparks_hevc/sparks_hevc.m3u8 (HEVC)
+- http://localhost:3005/meridian_hevc/meridian_hevc.m3u8 (HEVC)
 
 ## How to Modify the Encoding/Streaming
 
-Feel free to adjust the encoding settings in `utils/encode.sh`. We've chosen a simple set of renditions with a one-pass fixed target bitrate, and no audio.
+Feel free to adjust the encoding settings in `utils/encode.sh`. We've chosen a simple set of renditions with a one-pass fixed target bitrate, and no audio. The script supports both H.264 (`libx264`) and HEVC (`libx265`) codecs.
 
 You can also modify the `content/index.html` page to adjust the `hls.js` settings or video display.
 
