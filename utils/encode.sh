@@ -100,7 +100,7 @@ if [[ "$USE_LOCAL" == true ]]; then
   fi
 else
   input_movies=(
-    ["bbb"]="./content_original/Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film [aqz-KE-bpKQ].mkv"
+    ["bbb"]="./content_original/Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film [aqz-KE-bpKQ].mp4"
     ["charge"]="./content_original/CHARGE - Blender Open Movie [UXqq0ZvbOnk].webm"
     ["wing_it"]="./content_original/WING IT! - Blender Open Movie [u9lj-c29dxI].webm"
     ["tears_of_steel"]="./content_original/Tears of Steel - Blender VFX Open Movie [R6MlUcmOul8].webm"
