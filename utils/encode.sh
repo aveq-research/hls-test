@@ -65,6 +65,10 @@ while [[ $# -gt 0 ]]; do
     FORCE=true
     shift
     ;;
+  -*)
+    echo "Unknown option: $1"
+    usage
+    ;;
   *)
     SELECTED_MOVIES+=("$1")
     shift
