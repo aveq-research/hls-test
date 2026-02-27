@@ -2,7 +2,7 @@
 #
 # Encode movies to HLS
 #
-# Usage: ./utils/encode.sh [options]
+# Usage: ./utils/encode.sh [options] [movie ...]
 #
 # Copyright (c) 2024 AVEQ GmbH.
 # License: MIT
@@ -18,8 +18,13 @@ USE_LOCAL=false
 FORCE=false
 CODEC=h264
 
+SELECTED_MOVIES=()
+
 usage() {
-  echo "Usage: $0 [options]"
+  echo "Usage: $0 [options] [movie ...]"
+  echo
+  echo "Encode movies to HLS. If one or more movie names are given, only those"
+  echo "are encoded. Otherwise all available movies are encoded."
   echo
   echo "Options:"
   echo "  -ss <time>        Start time offset in seconds (default: $START_OFFSET)"
@@ -61,8 +66,8 @@ while [[ $# -gt 0 ]]; do
     shift
     ;;
   *)
-    echo "Unknown option: $1"
-    usage
+    SELECTED_MOVIES+=("$1")
+    shift
     ;;
   esac
 done
@@ -259,8 +264,22 @@ encode_movie_hevc() {
 
 mkdir -p "$CONTENT_DIR"
 
+# determine which movies to encode
+if [[ ${#SELECTED_MOVIES[@]} -gt 0 ]]; then
+  movies_to_encode=()
+  for movie in "${SELECTED_MOVIES[@]}"; do
+    if [[ -z "${input_movies[$movie]+x}" ]]; then
+      echo "Error: unknown movie '$movie' (available: ${!input_movies[*]})"
+      exit 1
+    fi
+    movies_to_encode+=("$movie")
+  done
+else
+  movies_to_encode=("${!input_movies[@]}")
+fi
+
 # iterate and encode
-for movie in "${!input_movies[@]}"; do
+for movie in "${movies_to_encode[@]}"; do
   if [[ "$CODEC" == "hevc" ]]; then
     output_name="${movie}_hevc"
     encode_fn=encode_movie_hevc

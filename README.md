@@ -45,6 +45,19 @@ Encode the movies with `./utils/encode.sh`.
 
 This creates various representations of the videos in the `content` directory, using HLS and multiple bitrate renditions. The videos will have their resolution embedded into the stream so you can see the difference in quality. Sources with 4K resolution get 5 renditions (360p-4K), others get 4 (360p-1080p).
 
+By default, all movies are encoded. To encode only specific movies, pass their names as arguments:
+
+```bash
+# Encode all movies (default)
+./utils/encode.sh
+
+# Encode only specific movies
+./utils/encode.sh bbb charge
+
+# Combine with other options
+./utils/encode.sh --codec hevc bbb
+```
+
 By default, H.264 is used. To encode with HEVC (H.265) instead, use `--codec hevc`:
 
 ```bash
