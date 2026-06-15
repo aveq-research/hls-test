@@ -139,6 +139,37 @@ has_4k_source() {
   [[ "$height" -ge 2160 ]]
 }
 
+# Source frame rate as a decimal (e.g. 60.000, 59.940), for the HLS FRAME-RATE tag.
+detect_fps_decimal() {
+  local input_movie="$1" src_fps
+  src_fps=$(ffprobe -v 0 -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$input_movie" | head -1)
+  awk -v r="$src_fps" 'BEGIN {
+    if (index(r, "/") > 0) { n = r; sub(/\/.*/, "", n); d = r; sub(/.*\//, "", d) }
+    else { n = r; d = 1 }
+    if (d == "" || d + 0 == 0) d = 1
+    printf "%.3f", n / d
+  }'
+}
+
+# ffmpeg's HLS muxer omits the optional FRAME-RATE attribute on the
+# EXT-X-STREAM-INF lines of the master playlist. Without it, players that read
+# the frame rate from the manifest (e.g. ExoPlayer, and in turn the Surfmeter
+# SDK) have no value and fall back to a default, so reported framerate is wrong.
+# This injects FRAME-RATE into each variant line in place; segments are
+# untouched, so it is safe to run on an already-encoded master playlist too.
+add_frame_rate_to_master() {
+  local master="$1" fps="$2"
+  [[ -f "$master" ]] || return 0
+  awk -v fr="$fps" '
+    /^#EXT-X-STREAM-INF:/ && $0 !~ /FRAME-RATE=/ {
+      if ($0 ~ /,CODECS=/) sub(/,CODECS=/, ",FRAME-RATE=" fr ",CODECS=")
+      else $0 = $0 ",FRAME-RATE=" fr
+    }
+    { print }
+  ' "$master" > "${master}.tmp" && mv "${master}.tmp" "$master"
+  echo "  Added FRAME-RATE=${fps} to master playlist"
+}
+
 encode_movie_h264() {
   local input_movie="$1"
   local output_movie="$2"
@@ -299,6 +330,7 @@ for movie in "${movies_to_encode[@]}"; do
   fi
   echo "Encoding $output_name ($CODEC) ..."
   $encode_fn "${input_movies[$movie]}" "$output_name.m3u8"
+  add_frame_rate_to_master "$master_playlist" "$(detect_fps_decimal "${input_movies[$movie]}")"
 done
 
 echo "Done"
